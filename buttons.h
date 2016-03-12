@@ -79,7 +79,7 @@ void doButtons() {
 
     case BTNRELEASED: // button was pressed and released quickly
       cycleMillis = currentMillis;
-      if (++currentEffect >= totalEffects) currentEffect = 0; // loop to start of effect list
+      if (++currentEffect >= numEffects) currentEffect = 0; // loop to start of effect list
       effectInit = false; // trigger effect initialization when new effect is selected
       eepromMillis = currentMillis;
       eepromOutdated = true;
@@ -103,17 +103,6 @@ void doButtons() {
       eepromMillis = currentMillis;
       eepromOutdated = true;
       break;
-          /*
-        tried changing around button fucntionality, saving this for future edits
-        if (effectList[]a == {scrollTextThree, 
-                              RGBpulse}) {
-                    effectList[]b = {{drawAnalyzer, 
-                              drawVU}; }
-        else
-                    effectList[]a = {{scrollTextThree, 
-                              scrollTextTwo}; }
-
-        */
 
     case BTNLONGPRESS: // button was held down for a while
       currentBrightness = STARTBRIGHTNESS; // reset brightness to startup value
@@ -122,19 +111,7 @@ void doButtons() {
       eepromOutdated = true;
       break;
 
-      /*
-        tried changing around button fucntionality, saving this for future edits
-        if (effectList[] == {drawAnalyzer, 
-                              RGBpulse}) {
-                    effectList[] = {{drawAnalyzer, 
-                              drawVU}; }
-        else if (effectList[] == {drawAnalyzer, 
-                              drawVU})
-                    effectList[] = {{drawAnalyzer, 
-                              drawVU}; }
-
-        */
-
   }
   
 }
+
