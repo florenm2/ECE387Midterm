@@ -116,7 +116,7 @@ void glitter() {
 // Fills saturated colors into the array from alternating directions
 void colorFill() {
 
-  static byte colorCurrent = 0;
+  static byte currentColor = 0;
   static byte currentRow = 0;
   static byte currentDirection = 0;
 
@@ -124,7 +124,7 @@ void colorFill() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 45;
-    colorCurrent = 0;
+    currentColor = 0;
     currentRow = 0;
     currentDirection = 0;
     currentPalette = RainbowColors_p;
@@ -136,7 +136,7 @@ void colorFill() {
     for (byte x = 0; x < kMatrixWidth; x++) {
       byte y = currentRow;
       if (currentDirection == 2) y = kMatrixHeight - 1 - currentRow;
-      leds[XY(x, y)] = currentPalette[colorCurrent];
+      leds[XY(x, y)] = currentPalette[currentColor];
     }
   }
 
@@ -146,7 +146,7 @@ void colorFill() {
     for (byte y = 0; y < kMatrixHeight; y++) {
       byte x = currentRow;
       if (currentDirection == 3) x = kMatrixWidth - 1 - currentRow;
-      leds[XY(x, y)] = currentPalette[colorCurrent];
+      leds[XY(x, y)] = currentPalette[currentColor];
     }
   }
 
@@ -155,8 +155,8 @@ void colorFill() {
   // detect when a fill is complete, change color and direction
   if ((!(currentDirection & 1) && currentRow >= kMatrixHeight) || ((currentDirection & 1) && currentRow >= kMatrixWidth)) {
     currentRow = 0;
-    colorCurrent += random8(3, 6);
-    if (colorCurrent > 15) colorCurrent -= 16;
+    currentColor += random8(3, 6);
+    if (currentColor > 15) currentColor -= 16;
     currentDirection++;
     if (currentDirection > 3) currentDirection = 0;
     effectDelay = 300; // wait a little bit longer after completing a fill
@@ -255,14 +255,10 @@ void slantBars() {
 #define charSpacing 2
 // Scroll a text string
 void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
-  static byte charCurrent = 0;
-  static byte colCurrent = 0;
-
-  
+  static byte currentMessageChar = 0;
+  static byte currentCharColumn = 0;
   static byte paletteCycle = 0;
-  static CRGB colorCurrent;
-
-  
+  static CRGB currentColor;
   static byte bitBuffer[16] = {0};
   static byte bitBufferPointer = 0;
 
@@ -270,18 +266,18 @@ void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 35;
-    charCurrent = 0;
-    colCurrent = 0;
+    currentMessageChar = 0;
+    currentCharColumn = 0;
     selectFlashString(message);
-    loadCharBuffer(loadStringChar(message, charCurrent));
+    loadCharBuffer(loadStringChar(message, currentMessageChar));
     currentPalette = RainbowColors_p;
     for (byte i = 0; i < kMatrixWidth; i++) bitBuffer[i] = 0;
   }
 
   paletteCycle += 15;
 
-  if (colCurrent < 5) { // characters are 5 pixels wide
-    bitBuffer[(bitBufferPointer + kMatrixWidth - 1) % kMatrixWidth] = charBuffer[colCurrent]; // character
+  if (currentCharColumn < 5) { // characters are 5 pixels wide
+    bitBuffer[(bitBufferPointer + kMatrixWidth - 1) % kMatrixWidth] = charBuffer[currentCharColumn]; // character
   } else {
     bitBuffer[(bitBufferPointer + kMatrixWidth - 1) % kMatrixWidth] = 0; // space
   }
@@ -302,14 +298,14 @@ void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
     }
   }
 
-  colCurrent++;
-  if (colCurrent > (4 + charSpacing)) {
-    colCurrent = 0;
-    charCurrent++;
-    char nextChar = loadStringChar(message, charCurrent);
+  currentCharColumn++;
+  if (currentCharColumn > (4 + charSpacing)) {
+    currentCharColumn = 0;
+    currentMessageChar++;
+    char nextChar = loadStringChar(message, currentMessageChar);
     if (nextChar == 0) { // null character at end of strong
-      charCurrent = 0;
-      nextChar = loadStringChar(message, charCurrent);
+      currentMessageChar = 0;
+      nextChar = loadStringChar(message, currentMessageChar);
     }
     loadCharBuffer(nextChar);
   }
@@ -332,13 +328,7 @@ void scrollTextTwo() {
   scrollText(2, NORMAL, CRGB::Green, CRGB(0,0,8));
 }
 
-void scrollTextThree() {
-  scrollText(3, NORMAL, CRGB::Blue, CRGB::Black);
-}
 
-void scrollTextFour() {
-  scrollText(4, RAINBOW, 0, CRGB::Black);
-}
 
 #define analyzerFadeFactor 5
 #define analyzerScaleFactor 2
@@ -384,10 +374,9 @@ void drawAnalyzer() {
 
 }
 
-//alter these numbers for different responsiveness
 #define VUFadeFactor 5
-#define VUScaleFactor 2
-#define VUPaletteFactor 2
+#define VUScaleFactor 2.5
+#define VUPaletteFactor 1.5
 void drawVU() {
   // startup tasks
   if (effectInit == false) {
@@ -398,17 +387,11 @@ void drawVU() {
 
   CRGB pixelColor;
 
-  const float xScale = (255.0 / (kMatrixWidth / 2));
-  float specCombo = (spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2] 
-                      + spectrumDecay[3] + spectrumDecay[4] + spectrumDecay[5] 
-                      + spectrumDecay[6]) / 7.0;
+  const float xScale = 255.0 / (kMatrixWidth / 2);
+  float specCombo = (spectrumDecay[0] + spectrumDecay[1]) / 2.0;
 
-      /*
-      Serial.print(xScale);
-      */
-      
   for (byte x = 0; x < kMatrixWidth / 2; x++) {
-    int senseValue = specCombo / (VUScaleFactor - (xScale * x));
+    int senseValue = specCombo / VUScaleFactor - xScale * x;
     int pixelBrightness = senseValue * VUFadeFactor;
     if (pixelBrightness > 255) pixelBrightness = 255;
     if (pixelBrightness < 0) pixelBrightness = 0;
@@ -422,24 +405,6 @@ void drawVU() {
     for (byte y = 0; y < kMatrixHeight; y++) {
       leds[XY(x, y)] = pixelColor;
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
-      /*
-      Serial.print(x);
-      Serial.print(" ");
-      Serial.print(spectrumDecay[0]);
-      Serial.print(" ");
-      Serial.print(spectrumDecay[1]);
-      Serial.print(" ");
-      Serial.print(pixelColor);
-      Serial.print(" ");
-      Serial.print(senseValue);
-      Serial.print(" ");
-      Serial.print(specCombo);
-      Serial.print(" ");
-      Serial.print(pixelPaletteIndex);
-      Serial.print(" ");
-      Serial.print(pixelBrightness);
-      Serial.println(".");
-      */
     }
   }
 
@@ -457,11 +422,6 @@ void RGBpulse() {
 
   static byte RGBcycle = 0;
 
-//working on timing
-//fadeAll(100);
-//fadeAll(10);
-//clearAllLEDs();
-//clearHalfLEDs();
   fadeAll(1);
 
   if (beatDetect()) {
@@ -471,21 +431,15 @@ void RGBpulse() {
         fillAll(CRGB::Red);
         break;
       case 1:
-        fillAll(CRGB::White);
+        fillAll(CRGB::Lime);
         break;
       case 2:
         fillAll(CRGB::Blue);
         break;
-      case 3:
-        fillAll(CRGB::Green);
-        break;
-      case 4:
-        fillAll(CRGB::Lime);
-        break;
     }
 
     RGBcycle++;
-    if (RGBcycle > 4) RGBcycle = 0;
+    if (RGBcycle > 2) RGBcycle = 0;
   }
 
 }

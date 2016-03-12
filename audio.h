@@ -1,16 +1,12 @@
 // Interface with MSGEQ7 chip for audio analysis
 
-//time between audio measurements
 #define AUDIODELAY 4
 
 // Pin definitions
 #define ANALOGPIN 3
-//determines when to measure individual frequency bands
 #define STROBEPIN 8
-//resets before each new note reading
 #define RESETPIN 7
 
-//This is entirely copied from an existing project on macetech.com
 // Smooth/average settings
 #define SPECTRUMSMOOTH 0.07
 #define PEAKDECAY 0.01
@@ -100,9 +96,7 @@ float lastBeatVal = 0;
 byte beatDetect() {
   static float beatAvg = 0;
   static unsigned long lastBeatMillis;
-  float specCombo = (spectrumDecay[0] + spectrumDecay[1] + spectrumDecay[2] 
-                      + spectrumDecay[3] + spectrumDecay[4] + spectrumDecay[5] 
-                      + spectrumDecay[6]) / 7.0;
+  float specCombo = (spectrumDecay[0] + spectrumDecay[1]) / 2.0;
   beatAvg = (1.0 - AGCSMOOTH) * beatAvg + AGCSMOOTH * specCombo;
   
   if (lastBeatVal < beatAvg) lastBeatVal = beatAvg;

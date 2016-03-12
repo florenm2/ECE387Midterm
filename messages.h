@@ -1,15 +1,11 @@
 // Scrolling messages
 
-const char string0[] PROGMEM = "EVERYBODY DANCE NOW    ";
-const char string1[] PROGMEM = "Flash Frames!    ";
-const char string2[] PROGMEM = "Mary Floren     ";
-const char string3[] PROGMEM = "Dance   ";
-const char string4[] PROGMEM = "ECE 387 rules!   ";
+const char string0[] PROGMEM = "WORLD MAKER FAIRE NYC 2015 ";
+const char string1[] PROGMEM = "RGB SHADES!  ";
+const char string2[] PROGMEM = "macetech.com  ";
 
 const char * const stringArray[] PROGMEM = {
   string0,
   string1,
-  string2,
-  string3,
-  string4
+  string2
 };

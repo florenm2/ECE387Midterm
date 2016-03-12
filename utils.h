@@ -8,7 +8,7 @@ unsigned long cycleMillis = 0; // store the time of last effect change
 unsigned long currentMillis; // store current loop's millis value
 unsigned long hueMillis; // store time of last hue change
 unsigned long eepromMillis; // store time of last setting change
-unsigned long audioTime; // store time of last audio update
+unsigned long audioMillis; // store time of last audio update
 byte currentEffect = 0; // index to the currently running effect
 boolean autoCycle = true; // flag for automatic effect changes
 boolean eepromOutdated = false; // flag for when EEPROM may need to be updated
@@ -17,7 +17,7 @@ byte currentBrightness = STARTBRIGHTNESS; // 0-255 will be scaled to 0-MAXBRIGHT
 CRGBPalette16 currentPalette(RainbowColors_p); // global palette storage
 
 typedef void (*functionList)(); // definition for list of effect function pointers
-extern const byte totalEffects;
+extern const byte numEffects;
 
 
 // Increment the global hue value for functions that use it
@@ -39,20 +39,6 @@ void fillAll(CRGB fillColor) {
 void fadeAll(byte fadeIncr) {
   for (byte i = 0; i < NUM_LEDS; i++) {
     leds[i] = leds[i].fadeToBlackBy(fadeIncr);
-  }
-}
-
-// Clear all LEDs
-void clearAllLEDS() {
-  for (byte i = 0; i < NUM_LEDS; i++) {
-    leds[i] = 0;
-  }
-}
-
-// Clear half LEDs
-void clearHalfLEDS() {
-  for (byte i = 0; i < NUM_LEDS/2; i++) {
-    leds[i] = 0;
   }
 }
 
